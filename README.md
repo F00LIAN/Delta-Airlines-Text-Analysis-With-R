@@ -26,7 +26,7 @@ Before running this project, ensure you have:
 - R and RStudio installed.
 - Required R libraries: `stringi`, `stringr`, `qdap`, `tm`, `wordcloud2`, `ggplot2`, `ggthemes`, `igraph`.
 - Access to the dataset (`oct_delta.csv` from GitHub). (We import explicitly in code)
-- (Optional) Downloaded the dataset ['delta_tweets'](https://raw.githubusercontent.com/kwartler/text_mining/master/oct_delta.csv)
+- Downloaded the dataset [Delta Tweets](https://raw.githubusercontent.com/kwartler/text_mining/master/oct_delta.csv)
 
 <h2>Installation Steps</h2>
 
