@@ -149,12 +149,14 @@ title(main="@DeltaAssist Refund Word Network")
 <p> <img src="https://github.com/user-attachments/assets/word_network.png" height="80%" width="80%" alt="Word Network"/> </p>
 
 ### 11. Conclusion
+
 - The dataset was cleaned by removing unnecessary characters, Twitter handles, URLs, and stopwords.
 - Frequent words were identified using a word cloud and term-document matrix.
 - Sentiment analysis was performed to detect complaints about delays, slow service, and refunds.
 - A word network was built to analyze associations with refund complaints.
 
 <h2>Future Improvements</h2>
+
 - Implement topic modeling (LDA) for deeper insights.
 - Use sentiment scoring (e.g., syuzhet package) to classify tweets.
 - Apply machine learning to predict customer satisfaction trends.
