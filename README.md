@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://d2f0ora2gkri0g.cloudfront.net/fe/f8/fef807ef-1a6d-4355-95e7-3521c89db13b.jpg" height="60%" width="70%" alt="Delta Airlines Text Analysis"/>
+<img src="https://resilienteducator.com/wp-content/uploads/2015/09/Revising-With-Pictures-How-Word-Clouds-Help-Students-Become-Better-Writers.jpg" height="60%" width="70%" alt="Delta Airlines Text Analysis"/>
 </p>
 
 <h1>Delta Airlines Customer Service Tweet Analysis</h1>
