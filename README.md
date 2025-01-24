@@ -3,7 +3,7 @@
 </p>
 
 <h1>Delta Airlines Customer Service Tweet Analysis</h1>
-This project performs **text mining and natural language processing (NLP)** on Delta Airlines customer service tweets using **R**. The goal is to clean, preprocess, and analyze customer feedback to extract meaningful insights.<br />
+This project performs text mining and natural language processing (NLP) on Delta Airlines customer service tweets using R. The goal is to clean, preprocess, and analyze customer feedback to extract meaningful insights.<br />
 
 <h2>Video Demonstration</h2>
 
