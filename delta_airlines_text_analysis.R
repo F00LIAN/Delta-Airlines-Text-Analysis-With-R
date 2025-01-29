@@ -1,13 +1,20 @@
 # import delta airlines customer service tweets
-setwd("D:/Foundation of Business Analytics/")
 
 options(stringsAsFactors = F)
 Sys.setlocale('LC_ALL','C')
 
+install.packages(c("stringi", "wordcloud2", "igraph", "cluster", "NbClust", "factoextra", "openxl", "tm", "stopwords", "stringr", "SnowballC", "textstem", "tm"))
+
+library(tm)
+library(SnowballC)
+library(textstem)
 library(stringi)
 library(stringr)
 library(qdap)
 library(tm)
+library(stopwords)
+library(igraph)
+library(wordcloud2)
 
 delta = read.csv("https://raw.githubusercontent.com/kwartler/text_mining/master/oct_delta.csv", sep=",", header=T)
 
@@ -29,6 +36,8 @@ text.only = delta$text
 text.only
 
 # let's strip out anything that isn't important words
+text.only <- gsub(pattern="@\\S+", replacement="", x=text.only)
+text.only <- gsub(pattern="https?://\\S+", replacement="", x=text.only)
 
 # first examine the first 5 tweets
 first.5.texts.only = text.only[1:5]
@@ -41,6 +50,10 @@ first.5.texts.only
 unlist(str_extract_all(text.only, "@\\S+"))
 
 # remove twitter IDs from first 5 tweets
+text.only <- gsub(pattern="\\S*\\d+\\S*", replacement="", x=text.only) # Remove numbers
+text.only <- str_replace_all(text.only,"&amp","") # Remove &amp
+text.only <- str_replace_all(text.only, "\\*[a-zA-Z]{2}", "") # Remove initials
+text.only <- iconv(text.only,"UTF-8", "ASCII", sub = "") # Remove special characters
 
 # compare before and after: first five tweets
 lapply(1:5, function(i){
@@ -139,7 +152,8 @@ text.only
 # these unimportant words are called "stop words" https://en.wikipedia.org/wiki/Stop_words
 # we may want to exclude commonly used words like "the", "and", "a" as they don't really improve the analysis
 # you can use pre-built lists or you can make your own custom list of words to exclude
-stopwords('english')
+stopwords.list <- c(stopwords("english"), "delta", "dm", "tsa", "atl", "dl", "eta", "lol", "smh")
+text.only <- removeWords(text.only, words=stopwords.list)
 
 # but let's say we wanted to add more stopwords
 more.words = c("delta","dm","tsa","atl","dl","eta","lol","smh")
@@ -179,6 +193,7 @@ test
 
 # we can "stem" the words so that we "cut off" the ends of the words, leaving only the roots of the words
 # stemming helps to treat all words that are basically the same, as similar
+
 stemmed = stemDocument(test)
 stemmed
 
@@ -311,91 +326,73 @@ final.text
 all.words = sort(unlist(text.only.completed.no.nas))
 freq = table(all.words)
 word=names(freq)
-wordcounts = cbind.data.frame(word,as.numeric(freq))
-wordcounts
 
 # let's do a word cloud
-library(wordcloud2)
-wordcloud2(data=wordcounts, size=1.5,shape='square')
 
+# Extract word frequencies
+all.words <- sort(unlist(strsplit(text.only, " ")))
+word.freq <- table(all.words)
+wordcounts <- data.frame(word=names(word.freq), freq=as.numeric(word.freq))
+
+# Generate word cloud
+wordcloud2(wordcounts, size=1.5, shape='square')
+
+# Sentiment Analysis: Identifying Negative Feedback
+negative.words <- c("\\bdelay\\b", "\\blong\\b", "\\bslow\\b", "\\bhold up\\b", "\\bwait\\b")
+negative.pattern <- paste(negative.words, collapse="|")
+has.negativity <- grepl(negative.pattern, x=text.only, ignore.case=FALSE)
+table(has.negativity)
+text.only[has.negativity==TRUE]
 # let's say we wanted to know how many tweets involved slow service
 # we could search for terms like "delay", "slow", "hold up" etc.
 # let's do this
 slow.service = c("\\bdelay\\b","\\blong\\b","\\bslow\\b","\\bhold up\\b","\\bwait\\b")
 slow.service.pasted= paste(slow.service,collapse="|")
-has.delays = grepl(slow.service.pasted,x=final.text,ignore.case=FALSE)
+has.delays = grepl(slow.service.pasted,x=text.only,ignore.case=FALSE)
 table(has.delays)
-final.text[has.delays==TRUE]
+text.only[has.delays==TRUE]
 
-# we could also automatically pull synonyms for the above words
-# automating the process is convenient but can lead to unintended results
-syns = sort(unique(as.vector(unlist(synonyms(c("delay","long","slow","hold up","wait"))))))
-syns # lot's of words that are unrelated, but could also give you ideas for more words to include
 
-# let's look to see what words are most highly associated with apologies
-# create a unique ID for each tweet
-ID = 1:J
-tweets = cbind.data.frame(ID,final.text)
-colnames(tweets) = c("doc_id","text")
-tweets[1:10,]
+### TDM for Most Frequent Words
+library(tm)
 
-# read in tweets to a corpus
-corpus = VCorpus(DataframeSource(tweets))
+ID <- 1:length(text.only)
+tweets.df <- data.frame(doc_id=ID, text=text.only)
+corpus <- VCorpus(DataframeSource(tweets.df))
 
-# now create the term document matrix
-tdm = TermDocumentMatrix(corpus,control=list(weighting=weightTf))
-tdm.tweets.m = as.matrix(tdm)
-dim(tdm.tweets.m)
+# Create Term-Document Matrix
+tdm <- TermDocumentMatrix(corpus, control=list(weighting=weightTf))
+tdm.matrix <- as.matrix(tdm)
 
-# the term document matrix has all the unique words as rows and the documents as columns
-# in this format, text analysis and more complicated models can be built
-tdm.tweets.m
+# Extract and visualize frequent words
+term.freq <- rowSums(tdm.matrix)
+freq.df <- data.frame(word=names(term.freq), frequency=term.freq)
+freq.df <- freq.df[order(freq.df$frequency, decreasing=TRUE),]
 
-popular.words = match(c("apologetic","can","confirmation","delay","flight","happy"),rownames(tdm.tweets.m))
-
-# let's look at the counts of the number of popular words for the first 30 tweets
-tdm.tweets.m[popular.words,1:30]
-
-# let's do a bar plot of the most popular words
+# Barplot of top 20 frequent words
 library(ggplot2)
-library(ggthemes)
-term.freq = rowSums(tdm.tweets.m)
+ggplot(freq.df[1:20,], aes(x=reorder(word, -frequency), y=frequency)) +
+  geom_bar(stat="identity", fill="darkred") +
+  coord_flip() +
+  theme_minimal() +
+  labs(title="Top 20 Frequent Words", x="Word", y="Frequency")
 
-# create a data frame with each unique word as the rows and counts of words as the columns
-freq.df = data.frame(word=names(term.freq),frequency=term.freq)
 
-# sort it from largest to smallest counts
-freq.df = freq.df[order(freq.df[,2],decreasing=T),]
-freq.df[1:10,]
+## Refund Word Network
+refund.tweets <- text.only[grepl("refund", text.only, ignore.case=TRUE)]
+refund.corpus <- VCorpus(VectorSource(refund.tweets))
+refund.tdm <- TermDocumentMatrix(refund.corpus, control=list(weighting=weightTf))
 
-# plot the 20 most popular words to show relative importance
-freq.df$word = factor(freq.df$word, levels=unique(as.character(freq.df$word)))
-ggplot(freq.df[1:20,], aes(x=word,y=frequency))+geom_bar(stat="identity",fill="darkred")+
-  coord_flip()+theme_gdocs()+geom_text(aes(label=frequency),colour="white",hjust=1.25,size=5)
+refund.matrix <- as.matrix(refund.tdm)
+refund.adj <- refund.matrix %*% t(refund.matrix)
 
-# what words are most highly associated with the term "refund"?
-# let's do a word network plot
-library(igraph)
-refund = tweets[grep("refund",tweets$text,ignore.case=T),]
+# Convert to graph
+refund.graph <- graph.adjacency(refund.adj, weighted=T, mode="undirected", diag=F)
+refund.graph <- simplify(refund.graph)
 
-# only 7 tweets have the term refund
-refund
-
-# read into a corpus
-refund.corpus = VCorpus(DataframeSource(refund))
-refund.tdm = TermDocumentMatrix(refund.corpus,control=list(weighting=weightTf))
-as.matrix(refund.tdm)
-
-# plot
-refund.m = as.matrix(refund.tdm)
-refund.adj = refund.m%*%t(refund.m)
-refund.adj=graph.adjacency(refund.adj,weighted=T,mode="undirected",diag=T)
-refund.adj=simplify(refund.adj)
-plot.igraph(refund.adj,vertex.shape="none",
+# Plot Word Network
+plot.igraph(refund.graph, vertex.shape="none",
             vertex.label.font=2, vertex.label.color="darkred",
-            vertex.label.cex=.7,edge.color="gray85"); title(main='
-            @DeltaAssist Refund Word Network')
+            vertex.label.cex=.7, edge.color="gray85")
 
-# alternative plot with qdap
-word_network_plot(refund$text); title(main='
-            @DeltaAssist Refund Word Network')
+title(main="@DeltaAssist Refund Word Network")
