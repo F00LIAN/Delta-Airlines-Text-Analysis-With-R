@@ -7,7 +7,7 @@ This project performs text mining and natural language processing (NLP) on Delta
 
 <h2>Video Demonstration</h2>
 
-- ### [YouTube: Text Mining in R](https://www.youtube.com/watch?v=wNsKf7wSqhQ)
+- ### [YouTube: Text Mining in R (Coming Soon)](https://www.youtube.com/watch?v=wNsKf7wSqhQ)
 
 <h2>Environments and Technologies Used</h2>
 
@@ -49,7 +49,7 @@ mean(nchar(text.only))
 text.only <- gsub(pattern="@\\S+", replacement="", x=text.only)
 text.only <- gsub(pattern="https?://\\S+", replacement="", x=text.only)
 ```
-<p> <img src="https://github.com/user-attachments/assets/string_cleanup.png" height="80%" width="80%" alt="String Cleanup"/> </p>
+<p> <img src="https://github.com/user-attachments/assets/13c1302c-499e-4418-9051-8ba3fa20b3a6" height="80%" width="80%" alt="Load and Preprocess"/> </p>
 
 ### 4. Remove Unwanted Elements
 ```r
@@ -85,9 +85,9 @@ wordcounts <- data.frame(word=names(word.freq), freq=as.numeric(word.freq))
 # Generate word cloud
 wordcloud2(wordcounts, size=1.5, shape='square')
 ```
-<p> <img src="https://github.com/user-attachments/assets/wordcloud.png" height="80%" width="80%" alt="Word Cloud"/> </p>
+<p> <img src="https://github.com/user-attachments/assets/08b6524f-e896-4e75-87ce-a206d5f48488" height="80%" width="80%" alt="Word Cloud"/> </p>
 
-### 8. Sentiment Analysis: Identifying Negatice Feedback
+### 8. Sentiment Analysis: Identifying Negative Feedback
 ```r
 negative.words <- c("\\bdelay\\b", "\\blong\\b", "\\bslow\\b", "\\bhold up\\b", "\\bwait\\b")
 negative.pattern <- paste(negative.words, collapse="|")
@@ -95,7 +95,16 @@ has.negativity <- grepl(negative.pattern, x=text.only, ignore.case=FALSE)
 table(has.negativity)
 text.only[has.negativity==TRUE]
 ```
-<p> <img src="https://github.com/user-attachments/assets/negative_feedback.png" height="80%" width="80%" alt="Negative Feedback"/> </p>
+<p> <img src="https://github.com/user-attachments/assets/ac04abc4-bfa8-4789-bb9d-23a5f51cb760" height="80%" width="80%" alt="Negative Feedback"/> </p>
+
+```r
+negative.words <- c("\\bdelay\\b", "\\blong\\b", "\\bslow\\b", "\\bhold up\\b", "\\bwait\\b")
+negative.pattern <- paste(negative.words, collapse="|")
+has.negativity <- grepl(negative.pattern, x=text.only, ignore.case=FALSE)
+table(has.negativity)
+text.only[has.negativity==TRUE]
+```
+<p> <img src="https://github.com/user-attachments/assets/9b9f54e9-3905-4727-855b-9fe730e3dd3a" height="80%" width="80%" alt="Negative Feedback"/> </p>
 
 ### 9. Term Document Matrix (TDM) Analysis
 ```r
@@ -122,7 +131,7 @@ ggplot(freq.df[1:20,], aes(x=reorder(word, -frequency), y=frequency)) +
   theme_minimal() +
   labs(title="Top 20 Frequent Words", x="Word", y="Frequency")
 ```
-<p> <img src="https://github.com/user-attachments/assets/bar_chart.png" height="80%" width="80%" alt="Bar Chart of Word Frequency"/> </p>
+<p> <img src="https://github.com/user-attachments/assets/d2e084af-d3c1-4892-91af-f4ef9b48ff6e" height="80%" width="80%" alt="Bar Chart of Word Frequency"/> </p>
 
 ### 10. Word Network for "Refund" Complaints
 ```r
@@ -146,7 +155,7 @@ plot.igraph(refund.graph, vertex.shape="none",
 
 title(main="@DeltaAssist Refund Word Network")
 ```
-<p> <img src="https://github.com/user-attachments/assets/word_network.png" height="80%" width="80%" alt="Word Network"/> </p>
+<p> <img src="https://github.com/user-attachments/assets/24f397b1-d473-45d3-985a-5d9eafea0f9a" height="80%" width="80%" alt="Word Network"/> </p>
 
 ### 11. Conclusion
 
